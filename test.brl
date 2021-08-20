@@ -1,0 +1,4 @@
+wr [test/static_data]
+wr [test/a]
+wrevent [new_data:test/sensor_data]
+wrevent [tick_b:test/b]

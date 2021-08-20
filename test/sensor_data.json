@@ -1,0 +1,10 @@
+{
+    "ampere": "{amp}",
+    "dc_voltage": "{vdc}",
+    "temperature": "{temp}",
+    "rtd": {
+        "rtd1": "{rtd1}",
+        "rtd2": "{rtd2}",
+        "rtd3": "{rtd3}"
+    }
+}
