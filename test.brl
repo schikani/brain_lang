@@ -1,4 +1,10 @@
+# wr for write with a json file path in []
 wr [test/static_data]
 wr [test/a]
+
+# wrevent to fire event and store data dynamically
+# the first argument is an event name and 
+# second the json file path
+
 wrevent [new_data:test/sensor_data]
 wrevent [tick_b:test/b]

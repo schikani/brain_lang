@@ -1,14 +1,28 @@
 from ubrainDB import ubrainDB as DB
 import json
 
+COMMENT = "#"
 WR = "wr"
 WREVENT = "wrevent"
+RD = "rd"
 LSQUARE = "["
 RSQUARE = "]"
 SEMI = ":"
 
 TOKENS = [WR, WREVENT, LSQUARE, RSQUARE]
 
+class Store_Rows():
+    def __init__(self, db_file):
+        self.db_file = db_file
+        self.db = DB("."+self.db_file)
+
+    def update(self, num_row):
+        self.db.write(self.db_file, num_row)
+
+    def get_rows(self):
+        if self.db.read(self.db_file) == "Invalid key!":
+            self.db.write(self.db_file, 0)
+        return self.db.read(self.db_file)
 
 class Tokens():
 
@@ -27,7 +41,11 @@ class Tokens():
             self.line_num += 1
             words = line.split()
             if len(words) > 0:
-                if words[0] == WR:
+
+                if words[0][0] == COMMENT:
+                    pass
+
+                elif words[0] == WR:
                     self.current_cmd = WR
                     if words[1].find(LSQUARE) != -1 and words[1].find(RSQUARE) != -1:
                         self.current_json_file = words[1][words[1].find(LSQUARE)+1:words[1].find(RSQUARE)]
@@ -69,8 +87,13 @@ class BrainLang(Tokens):
         return json.loads(result)
 
     def write_data(self, j_file, db, **kwargs):
+        d = {}
         for k, v in self.get_structure(j_file, **kwargs).items():
-            db.write(k, v)
+            d[k] = v
+        store_rows = Store_Rows(j_file.replace("/", "_").replace(".json", ".brain"))
+        num_rows = store_rows.get_rows()
+        db.write(num_rows, d)
+        store_rows.update(num_rows + 1)
 
     def read_event_data(self, event_name, key):
         if event_name in self.events.keys():
@@ -80,6 +103,7 @@ class BrainLang(Tokens):
 
     def read_static_data(self, db_file, key):
         db_file = db_file.replace("/", "_") + ".brain"
+        store_rows = Store_Rows(db_file)
         db = DB(db_file)
         val = db.read(key)
         db.close()
@@ -97,10 +121,14 @@ class BrainLang(Tokens):
         if event_name in self.events.keys():
             self.write_data(self.events[event_name]["j_file"], self.events[event_name]["db"], **kwargs)
 
+        else:
+            print("Unknown event name '{}'".format(event_name))
+            
+
 
 # ~~~~~~~~
 # Usage
 # ~~~~~~~~
 
-# replace "test1.brl" with your custom script
-# ob = BrainLang("test1.brl")  
+# replace "test.brl" with your custom script
+# ob = BrainLang("test.brl")  
