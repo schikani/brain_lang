@@ -1,4 +1,33 @@
-wr [test/static_data]
-wr [test/a]
-wrevent [new_data:test/sensor_data]
-wrevent [tick_b:test/b]
+#First structure
+|static_data|
+    {
+        "time": [
+            [10.1, 10.2, 10.3, 10.4],
+            [25.0, 25.1, 25.2, 25.3, 25.4]
+        ],
+
+        "temperature": {
+            "now": 21,
+            "before": {
+                "before_30_mins": 22,
+                "before_75_mins": 25
+            }
+        }            
+    }
+end
+
+# Second structure
+|dynamic_data|
+    {
+        "time": "{time}",
+        "current": "{current}",
+        "firmware": {
+            "ver1": "{ver1}",
+            "ver2": "{ver1}-{ver2}",
+            "ver3": "{ver1}-{ver2}-{ver3}"
+        }
+    }
+end
+
+wr <static_data>
+wrevent <dynamic_data>

@@ -1,9 +1,0 @@
-{
-    "time": "{time}",
-    "current": "{current}",
-    "firmware": {
-        "ver1": "{ver1}",
-        "ver2": "{ver1}-{ver2}",
-        "ver3": "{ver1}-{ver2}-{ver3}"
-    }
-}
