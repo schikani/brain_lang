@@ -1,0 +1,3 @@
+[submodule "brainDB"]
+	path = brainDB
+	url = git@github.com:schikani/brainDB
