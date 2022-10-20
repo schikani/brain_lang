@@ -1,6 +1,5 @@
-from ubrainDB import ubrainDB as DB
-import json
-import re
+from jsonDB import jsonDB as DB
+from json import loads
 
 COMMENT = "#"
 LOAD = "load"
@@ -19,14 +18,16 @@ TOKENS = [LOAD, WR, WREVENT, PRINT, PIPE, COMMENT]
 class Store_Rows():
     def __init__(self, db_file):
         self.db_file = db_file
-        self.db = DB(".row_counts")
+        self.db = DB("./DB", ".row_counts")
 
     def update(self, num_row):
         self.db.write(self.db_file, num_row)
+        self.db.flush()
 
     def get_rows(self):
-        if self.db.read(self.db_file) == "Invalid key!":
+        if not self.db.exists(self.db_file):
             self.db.write(self.db_file, 0)
+            self.db.flush()
         return self.db.read(self.db_file)
 
 class Tokens():
@@ -96,7 +97,7 @@ class BrainLang(Tokens):
         result = self.blocks[block]
         for k, v in kwargs.items():
             result = result.replace("{%s}" % k, str(v))
-        return json.loads(result)
+        return loads(result)
 
     def write_data(self, block, db, is_static, **kwargs):
         d = {}
@@ -117,24 +118,24 @@ class BrainLang(Tokens):
             return None
 
     def read_static_data(self, block):
-        db = DB(self.get_brain_extension(block))
+        db = DB("./DB", self.get_brain_extension(block))
         val = db.read(0)
-        db.close()
         return val
             
     def execute(self):
         for line in self.advance():
             if self.current_cmd == WR:
-                db = DB(self.get_brain_extension(self.block))
+                db = DB("./DB", self.get_brain_extension(self.block))
                 self.write_data(self.block, db, is_static=True)
-                db.close()
+                db.flush()
 
             elif self.current_cmd == WREVENT:
-                self.db_list[self.block] = DB(self.get_brain_extension(self.block))
+                self.db_list[self.block] = DB("./DB", self.get_brain_extension(self.block))
 
     def fire_event(self, block, **kwargs):
         if block in self.block_list:
             self.write_data(block, self.db_list[block], is_static=False, **kwargs)
+            self.db_list[block].flush()
 
         else:
             print("Unknown event name '{}'".format(block))
