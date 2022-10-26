@@ -1,5 +1,6 @@
 from jsonDB import jsonDB as DB
 from json import loads
+import os
 
 COMMENT = "#"
 LOAD = "load"
@@ -12,13 +13,22 @@ END = "end"
 LEFT = "<"
 RIGHT = ">"
 
-
 TOKENS = [LOAD, WR, WREVENT, PRINT, PIPE, COMMENT]
+
+BASE_DB_DIR = "DB"
+if BASE_DB_DIR not in os.listdir("."):
+    os.mkdir(BASE_DB_DIR)
+
+def mk_db_dir(db_name):
+    if db_name not in os.listdir(BASE_DB_DIR):
+        os.mkdir(BASE_DB_DIR+"/"+db_name)
+    
+    return db_name
 
 class Store_Rows():
     def __init__(self, db_file):
         self.db_file = db_file
-        self.db = DB("./DB", ".row_counts")
+        self.db = DB(BASE_DB_DIR, ".row_counts")
 
     def update(self, num_row):
         self.db.write(self.db_file, num_row)
@@ -91,6 +101,7 @@ class Tokens():
 class BrainLang(Tokens):
     def __init__(self, brl_file):
         super().__init__(brl_file)
+        self.db_file = BASE_DB_DIR + "/" + mk_db_dir(self.brl_file)
         self.execute()
         
     def get_structure(self, block, **kwargs):
@@ -104,7 +115,7 @@ class BrainLang(Tokens):
         for k, v in self.get_structure(block, **kwargs).items():
             d[k] = v
         if not is_static:
-            store_rows = Store_Rows(self.get_brain_extension(block))
+            store_rows = Store_Rows(self.db_file+"/"+self.get_brain_extension(block))
             num_rows = store_rows.get_rows()
             db.write(num_rows, d)
             store_rows.update(num_rows + 1)
@@ -118,19 +129,19 @@ class BrainLang(Tokens):
             return None
 
     def read_static_data(self, block):
-        db = DB("./DB", self.get_brain_extension(block))
+        db = DB(self.db_file, self.get_brain_extension(block))
         val = db.read(0)
         return val
             
     def execute(self):
         for line in self.advance():
             if self.current_cmd == WR:
-                db = DB("./DB", self.get_brain_extension(self.block))
+                db = DB(self.db_file, self.get_brain_extension(self.block))
                 self.write_data(self.block, db, is_static=True)
                 db.flush()
 
             elif self.current_cmd == WREVENT:
-                self.db_list[self.block] = DB("./DB", self.get_brain_extension(self.block))
+                self.db_list[self.block] = DB(self.db_file, self.get_brain_extension(self.block))
 
     def fire_event(self, block, **kwargs):
         if block in self.block_list:
