@@ -16,13 +16,10 @@ RIGHT = ">"
 TOKENS = [LOAD, WR, WREVENT, PRINT, PIPE, COMMENT]
 
 BASE_DB_DIR = "DB"
-if BASE_DB_DIR not in os.listdir("."):
-    os.mkdir(BASE_DB_DIR)
 
 def mk_db_dir(db_name):
     if db_name not in os.listdir(BASE_DB_DIR):
         os.mkdir(BASE_DB_DIR+"/"+db_name)
-    
     return db_name
 
 class Store_Rows():
@@ -45,6 +42,10 @@ class Tokens():
     tokens = []
 
     def __init__(self, brl_file):
+
+        if BASE_DB_DIR not in os.listdir("."):
+            os.mkdir(BASE_DB_DIR)
+
         self.line_num = 0
         self.brl_file = brl_file
         self.openfileobject = open(self.brl_file, "r")
